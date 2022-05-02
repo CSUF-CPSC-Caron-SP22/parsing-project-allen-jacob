@@ -20,7 +20,7 @@ class Parser:
         """
         self.token_stream = token_stream
         # self.parser_table = self.__read_parse_table(parse_table_file)
-        self.parser_table = self.read_parse_table(parse_table_file)
+        self.parser_table = self.__read_parse_table(parse_table_file)
         # Append the end of file symbol to the end.
         self.token_stream.append(("$", "$"))
 
@@ -33,31 +33,34 @@ class Parser:
         with open(parse_table_file, "r") as file:
             file = csv.reader(file)
 
-            parser_dict = {}
-            row_list = []
-
-            for row in file:
-                row_list = row
-
-                for item in row_list:
-                    parser_dict.update({item: []})
-                break
-
-            for row in file:
-                print(row)
-                i = 0
-                while i < len(row):
-                    parser_dict[row_list[i]].append(row[i])
-                    i += 1
-
-            parser_dict.pop('')
+            parser_dict = self.__csv_parse_to_dict(file)
             
             return parser_dict
 
     def __csv_parse_to_dict(self, csv_file):
-        pass
+        """
+        
+        :param csv_file: csv object pulled from parse_tale_file in __read_parse_table
+        :return: a formatted parser dict
+        """
+        parser_dict = {}
+        row_list = []
 
-        raise NotImplementedError()
+        for row in csv_file:
+            row_list = row
+
+            for item in row_list:
+                parser_dict.update({item: []})
+            break
+
+        for row in csv_file:
+            print(row)
+            i = 0
+            while i < len(row):
+                parser_dict[row_list[i]].append(row[i])
+                i += 1
+
+        return parser_dict
 
     def __has_next_token(self):
         """
