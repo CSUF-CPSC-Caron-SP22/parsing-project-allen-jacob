@@ -13,16 +13,28 @@ class Parser:
     This class parses the token stream outputted from the lexical analyzer 
     into a parse tree or produces errors if the program is malformed.
     """
-    def __init__(self, token_stream, parse_table_file):
+    def __init__(self, token_stream, parse_table_file, grammar_rules_file):
         """
         Class constructor takes the token stream output from the 
         lexical analyzer as input. Appends $ to the end of the stream.
         """
+        # token_stream is the stack
         self.token_stream = token_stream
-        # self.parser_table = self.__read_parse_table(parse_table_file)
-        self.parser_table = self.read_parse_table(parse_table_file)
+        
         # Append the end of file symbol to the end.
         self.token_stream.append(("$", "$"))
+        
+        # Create Stack
+        self.stack = []
+
+        # self.parser_table = self.__read_parse_table(parse_table_file)
+        self.parser_table = self.__read_parse_table(parse_table_file)
+        
+        # Create Grammar Rules
+        self.grammar_rules = {}
+        
+        # set grammar rules dict
+        self.grammar_rules = self.__read_grammar_rules(grammar_rules_file)
 
     def __read_parse_table(self, parse_table_file):
         """
@@ -30,35 +42,76 @@ class Parser:
         @param parse_table_file The file path for the parse table csv file.
         @return A dictionary/map (state, symbol) -> action/goto.
         """
+        # extracts the parse_table csv file
         with open(parse_table_file, "r") as file:
             file = csv.reader(file)
 
-            parser_dict = {}
-            row_list = []
+        # parses the csv into a dict object
+        # ex: {symbol: [instruction, instruction]}
+        parser_dict = self.__parse_to_dict(file)
 
-            for row in file:
-                row_list = row
+        return parser_dict
 
-                for item in row_list:
-                    parser_dict.update({item: []})
-                break
+    # FIXME 
+    def __read_grammar_rules(self, grammar_rules_file):
+        """
 
-            for row in file:
-                print(row)
-                i = 0
-                while i < len(row):
-                    parser_dict[row_list[i]].append(row[i])
-                    i += 1
+        COMPLETE ME
 
-            parser_dict.pop('')
-            
-            return parser_dict
+        :param grammar_rules_file: 
+        :return: 
+        """
+        # extracts the parse_table csv file
+        with open(grammar_rules_file, "r") as file:
+            file = csv.reader(file)
 
-    def __csv_parse_to_dict(self, csv_file):
-        pass
+        # parses the grammar rules into a dict object
+        # ex: {symbol: [instruction, instruction]}
+        grammar_dict = self.__parse_to_dict(file)
 
-        raise NotImplementedError()
+        return grammar_dict
+        
+        
+        
+        grammar_dict = {}
 
+        # remove once function is complete
+        raise "incomplete function"
+
+        return grammar_dict
+
+    def __parse_to_dict(self, file_name):
+        """
+        helper function for __read_parse_table
+        parses a csv.reader object into a parse_dict
+
+        :param file_name: csv object pulled from parse_tale_file in __read_parse_table
+        :return: a formatted parser dict
+        """
+        parser_dict = {}
+        row_list = []
+
+        # iterates through first row in parser table
+        for row in file_name:
+            row_list = row
+
+            # extracts csv header
+            for item in row_list:
+                parser_dict.update({item: []})
+
+            # leaves after it grabs the csv header
+            break
+
+        # iterates through csv file and creates a dict that uses header as the keys
+        for row in file_name:
+            print(row)
+            i = 0
+            while i < len(row):
+                parser_dict[row_list[i]].append(row[i])
+                i += 1
+
+        return parser_dict
+        
     def __has_next_token(self):
         """
         @return True if the token stream is not empty.
@@ -76,13 +129,66 @@ class Parser:
             return to_return
         return None
 
+    def __top(self):
+        """
+        pseudo top function for the self.stack
+        list has all the rest of the functions needed for a stack
+        :return: either the item at the top of stack or null if empty
+        """
+        if len(self.stack) > 0:
+            return self.stack[len(self.stack)-1]
+        else:
+            return None
+
+    def __reduce_token(self, token):
+        
+        pass
+
+    def __shift(self, token):
+        pass
+
+    def __check_accepting_state(self, token):
+        pass
+
+    def __parse_token(self, token):
+        """
+
+        :param token:
+        :return:
+        """
+        # may not be needed
+        success = 0
+
+        if token == '' or token is None:
+            success = 0
+            raise "empty token"
+
+        if token == "ACCT":
+            return "ACCT: parsing_complete"
+
+        elif token[0] == 'S':
+            success = 1
+            self.__shift(token)
+        elif token[0] == 'R':
+            success = 1
+            self.__reduce_token(token)
+        elif isinstance(token, int):
+            success = 1
+            self.__check_accepting_state(token)
+        else:
+            success = 0
+            raise "unknown error"
+
+        return success
+
     def parse(self):
-        print(self.__get_next_token())
+
+        next_token = self.__get_next_token()
+        self.__parse_token(next_token)
+
         raise NotImplementedError()
 
 
 if __name__ == "__main__":
 
     parser = Parser([], "parsing_table.csv")
-
-
