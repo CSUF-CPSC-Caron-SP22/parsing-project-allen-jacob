@@ -13,7 +13,7 @@ class Parser:
     This class parses the token stream outputted from the lexical analyzer 
     into a parse tree or produces errors if the program is malformed.
     """
-    def __init__(self, token_stream, parse_table_file, grammar_rules_file):
+    def __init__(self, token_stream, parse_table_filename: str, grammar_rules_filename: str):
         """
         Class constructor takes the token stream output from the 
         lexical analyzer as input. Appends $ to the end of the stream.
@@ -27,14 +27,17 @@ class Parser:
         # Create Stack
         self.stack = []
 
+        # push state 0 onto stack
+        self.stack.append('0')
+
         # self.parser_table = self.__read_parse_table(parse_table_file)
-        self.parser_table = self.__read_parse_table(parse_table_file)
+        self.parser_table = self.__read_parse_table(parse_table_filename)
 
         # Create Grammar Rules
         self.grammar_rules = {}
 
         # set grammar rules dict
-        self.grammar_rules = self.__read_grammar_rules(grammar_rules_file)
+        self.grammar_rules = self.__read_grammar_rules(grammar_rules_filename)
 
     def __read_parse_table(self, parse_table_file: str) -> dict[str:list]:
         """
@@ -47,9 +50,11 @@ class Parser:
         with open(parse_table_file, "r") as file:
             file = csv.reader(file)
 
+            temp_csv = list(file)
+
         # parses the csv into a dict object
         # ex: {symbol: [instruction, instruction]}
-        parser_dict = self.__parse_to_dict(file)
+        parser_dict = self.__parse_to_dict(temp_csv)
 
         return parser_dict
 
@@ -64,9 +69,11 @@ class Parser:
         with open(grammar_rules_file, "r") as file:
             file = csv.reader(file)
 
+            temp_csv = list(file)
+
         # parses the grammar rules into a dict object
         # ex: {symbol: [instruction, instruction]}
-        grammar_dict = self.__parse_to_dict(file)
+        grammar_dict = self.__parse_to_dict(temp_csv)
 
         return grammar_dict
 
@@ -89,6 +96,9 @@ class Parser:
             for item in row_list:
                 parser_dict.update({item: []})
 
+            # test code
+            print(parser_dict)
+
             # leaves after it grabs the csv header
             break
 
@@ -96,11 +106,26 @@ class Parser:
         for row in csv_file:
             print(row)
             i = 0
+
             while i < len(row):
-                parser_dict[row_list[i]].append(row[i])
+                # FIXME this is not the optimal way of doing this
+                if row[i] != row_list[i]:
+                    parser_dict[row_list[i]].append(row[i])
                 i += 1
 
+        parser_dict[''].pop()
+        parser_dict[''] = row_list
+
+        print(parser_dict)
+
         return parser_dict
+
+    def __check_parse_table(self, state: str, token: str) -> str:
+
+        # looks up result on parser table
+        # FIXME brittle code
+        return self.parser_table[state][self.parser_table[''].index(state)]
+
 
     def __has_next_token(self):
         """
@@ -131,16 +156,29 @@ class Parser:
             return None
 
     def __reduce_token(self, token):
-
+        raise NotImplementedError()
         pass
 
-    def __shift(self, token):
-        pass
+    def __shift(self, action, token):
+        # FIXME complete documentation
+        """
+        
+        
+        :param action: 
+        :param token: 
+        :return: 
+        """
+        # push token
+        self.stack.append(token)
+        # push parsing_table_row
+        self.stack.append(action[1])
+
 
     def __check_accepting_state(self, token):
+        raise NotImplementedError()
         pass
 
-    def __parse_token(self, token):
+    def __parse_action(self, action, token):
         """
 
         :param token:
@@ -158,7 +196,7 @@ class Parser:
 
         elif token[0] == 'S':
             success = 1
-            self.__shift(token)
+            self.__shift(action, token)
         elif token[0] == 'R':
             success = 1
             self.__reduce_token(token)
@@ -173,14 +211,32 @@ class Parser:
 
     def parse(self):
 
-        next_token = self.__get_next_token()
-        self.__parse_token(next_token)
-
         raise NotImplementedError()
+
+        action_result = 1
+
+        while action_result != "ACCT":
+
+            next_token = self.__get_next_token()
+
+            state = self.__top()
+
+            lookup_result = self.__check_parse_table(state, next_token)
+
+            action = self.parser_table[next_token]
+
+            action_result = self.__parse_action(action, next_token)
+
+            if action_result == 0:
+                raise "ERROR action_result = 0"
+
+
+
+
 
 
 if __name__ == "__main__":
 
-    parser = Parser([], "parsing_table.csv")
+    parser = Parser([], "parsing_table.csv", "grammar_table.csv")
 
-    parser.parse_to_dict()
+
