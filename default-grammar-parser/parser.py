@@ -20,27 +20,28 @@ class Parser:
         """
         # token_stream is the stack
         self.token_stream = token_stream
-        
+
         # Append the end of file symbol to the end.
         self.token_stream.append(("$", "$"))
-        
+
         # Create Stack
         self.stack = []
 
         # self.parser_table = self.__read_parse_table(parse_table_file)
         self.parser_table = self.__read_parse_table(parse_table_file)
-        
+
         # Create Grammar Rules
         self.grammar_rules = {}
-        
+
         # set grammar rules dict
         self.grammar_rules = self.__read_grammar_rules(grammar_rules_file)
 
-    def __read_parse_table(self, parse_table_file):
+    def __read_parse_table(self, parse_table_file: str) -> dict[str:list]:
         """
         Reads the parse table from a file.
         @param parse_table_file The file path for the parse table csv file.
         @return A dictionary/map (state, symbol) -> action/goto.
+            dict format: {symbol: [instruction, instruction]}
         """
         # extracts the parse_table csv file
         with open(parse_table_file, "r") as file:
@@ -52,14 +53,12 @@ class Parser:
 
         return parser_dict
 
-    # FIXME 
-    def __read_grammar_rules(self, grammar_rules_file):
+    def __read_grammar_rules(self, grammar_rules_file: str) -> dict[str:list]:
         """
-
-        COMPLETE ME
-
-        :param grammar_rules_file: 
-        :return: 
+        Reads the grammar dict from a file
+        :param grammar_rules_file: grammar dict filename
+        :return: grammar dict:
+            ex: {symbol: [instruction, instruction]}
         """
         # extracts the parse_table csv file
         with open(grammar_rules_file, "r") as file:
@@ -70,29 +69,20 @@ class Parser:
         grammar_dict = self.__parse_to_dict(file)
 
         return grammar_dict
-        
-        
-        
-        grammar_dict = {}
 
-        # remove once function is complete
-        raise "incomplete function"
-
-        return grammar_dict
-
-    def __parse_to_dict(self, file_name):
+    def __parse_to_dict(self, csv_file: csv) -> dict[str:list]:
         """
         helper function for __read_parse_table
         parses a csv.reader object into a parse_dict
 
-        :param file_name: csv object pulled from parse_tale_file in __read_parse_table
+        :param csv_file: csv object pulled from parse_tale_file in __read_parse_table
         :return: a formatted parser dict
         """
         parser_dict = {}
         row_list = []
 
         # iterates through first row in parser table
-        for row in file_name:
+        for row in csv_file:
             row_list = row
 
             # extracts csv header
@@ -103,7 +93,7 @@ class Parser:
             break
 
         # iterates through csv file and creates a dict that uses header as the keys
-        for row in file_name:
+        for row in csv_file:
             print(row)
             i = 0
             while i < len(row):
@@ -111,7 +101,7 @@ class Parser:
                 i += 1
 
         return parser_dict
-        
+
     def __has_next_token(self):
         """
         @return True if the token stream is not empty.
@@ -141,7 +131,7 @@ class Parser:
             return None
 
     def __reduce_token(self, token):
-        
+
         pass
 
     def __shift(self, token):
@@ -192,3 +182,5 @@ class Parser:
 if __name__ == "__main__":
 
     parser = Parser([], "parsing_table.csv")
+
+    parser.parse_to_dict()
