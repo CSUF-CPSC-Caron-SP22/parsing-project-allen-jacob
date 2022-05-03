@@ -7,7 +7,9 @@ This is Jacob and Allen's project
 
 Jacob Ursenbach (jacob.ursenbach@gmail.com)
 
-Alan Turing (aturing@dcaron.xyz)
+Allen Rivas (allen.rrivas30@csu.fullerton.edu)
+
+Christian Lara ()
 
 ## How to compile and execute
 
