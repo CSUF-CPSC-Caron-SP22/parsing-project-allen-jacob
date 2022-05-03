@@ -121,11 +121,15 @@ class Parser:
         return parser_dict
 
     def __check_parse_table(self, state: str, token: str) -> str:
+        """
 
+        :param state:
+        :param token:
+        :return:
+        """
         # looks up result on parser table
         # FIXME brittle code
         return self.parser_table[state][self.parser_table[''].index(state)]
-
 
     def __has_next_token(self):
         """
@@ -144,6 +148,8 @@ class Parser:
             return to_return
         return None
 
+    # pseudo-stack functions
+
     def __top(self):
         """
         pseudo top function for the self.stack
@@ -155,28 +161,64 @@ class Parser:
         else:
             return None
 
-    def __reduce_token(self, token):
-        raise NotImplementedError()
-        pass
+    def __pop(self):
+
+        return self.stack.pop(len(self.stack))
+
+    def __push(self, push_item):
+        self.stack.append(push_item)
+
+    # reduction steps
+    def __reduce_token(self, action: str, token: str) -> None:
+        #FIXME -> complete documentation
+        """
+
+        :param action:
+        :param token:
+        :return:
+        """
+        self.__pop()
+        self.__pop()
+
+        non_terminal = self.grammar_rules[action][0]
+
+        self.__push(non_terminal)
+
+        next_stack = self.__top()
+
+        result = self.grammar_rules[non_terminal][next_stack]
+
+        self.__push(non_terminal)
+        self.__push(result)
+
+        print(f"{non_terminal} <-----> {result}")
 
     def __shift(self, action, token):
         # FIXME complete documentation
         """
-        
-        
-        :param action: 
-        :param token: 
-        :return: 
+
+
+        :param action:
+        :param token:
+        :return:
         """
         # push token
         self.stack.append(token)
         # push parsing_table_row
         self.stack.append(action[1])
 
-
     def __check_accepting_state(self, token):
-        raise NotImplementedError()
-        pass
+        #FIXME complete documentation
+        """
+        
+        :param token: 
+        :return: 
+        """
+        
+        if token == "ACCT":
+            return True
+        else:
+            return False
 
     def __parse_action(self, action, token):
         """
@@ -194,15 +236,20 @@ class Parser:
         if token == "ACCT":
             return "ACCT: parsing_complete"
 
+            # shift
         elif token[0] == 'S':
             success = 1
             self.__shift(action, token)
+
+            # reduce
         elif token[0] == 'R':
             success = 1
-            self.__reduce_token(token)
+            self.__reduce_token(action, token)
+
         elif isinstance(token, int):
-            success = 1
-            self.__check_accepting_state(token)
+            success = self.__check_accepting_state(token)
+            if not success:
+                raise "not accepted state. check code"
         else:
             success = 0
             raise "unknown error"
@@ -210,8 +257,6 @@ class Parser:
         return success
 
     def parse(self):
-
-        raise NotImplementedError()
 
         action_result = 1
 
@@ -229,10 +274,6 @@ class Parser:
 
             if action_result == 0:
                 raise "ERROR action_result = 0"
-
-
-
-
 
 
 if __name__ == "__main__":
