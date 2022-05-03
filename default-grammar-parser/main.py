@@ -2,9 +2,10 @@
 Main entry point.
 """
 import sys
-from parser import Parser
+from new_parser import Parser
 from lexer import Lexer
 from string import ascii_lowercase
+
 
 def read_file_as_string(filename):
     """
@@ -14,6 +15,7 @@ def read_file_as_string(filename):
     """
     with open(filename, 'r') as file_pointer:
         return file_pointer.read()
+
 
 # Ensure the right amount of arguments are provided.
 if len(sys.argv) != 2:
@@ -45,11 +47,11 @@ lexical_table[(4, '\r')] = 4
 lexical_table[(4, '\t')] = 4
 
 # Table for token classes at accepting states.
-token_table = {}
-token_table[1] = "id"
-token_table[2] = "+"
-token_table[3] = "="
-token_table[4] = "whitespace"
+token_table = {1: "id",
+               2: "+",
+               3: "=",
+               4: "whitespace"
+               }
 
 # Construct the lexer from the parsed file outputs from the parser.
 lexer = Lexer(lexical_table, token_table, source_code)
@@ -57,5 +59,8 @@ lexer = Lexer(lexical_table, token_table, source_code)
 token_stream = lexer.perform_analysis()
 
 # Perform the parse.
-parser = Parser(token_stream, "parse_table.csv")
+parser = Parser(token_stream, "parse_table.csv", "grammar_table.csv")
 parser.parse()
+
+if __name__ == "__main__":
+    pass
