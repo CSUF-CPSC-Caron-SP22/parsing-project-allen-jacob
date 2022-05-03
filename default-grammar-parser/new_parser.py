@@ -129,7 +129,7 @@ class Parser:
         """
         # looks up result on parser table
         # FIXME brittle code
-        return self.parser_table[state][self.parser_table[''].index(state)]
+        return self.parser_table[token][self.parser_table[''].index(state)]
 
     def __has_next_token(self):
         """
@@ -150,7 +150,7 @@ class Parser:
 
     # pseudo-stack functions
 
-    def __top(self):
+    def __stack_top(self):
         #FIXME -> complete documentation
         """
         pseudo top function for the self.stack
@@ -162,20 +162,20 @@ class Parser:
         else:
             return None
 
-    def __pop(self):
+    def __stack_pop(self):
         #FIXME -> complete documentation
         """
-        
-        :return: 
+
+        :return:
         """
         return self.stack.pop(len(self.stack))
 
-    def __push(self, push_item):
+    def __stack_push(self, push_item):
         #FIXME -> complete documentation
         """
-        
-        :param push_item: 
-        :return: 
+
+        :param push_item:
+        :return:
         """
         self.stack.append(push_item)
 
@@ -188,19 +188,19 @@ class Parser:
         :param token:
         :return:
         """
-        self.__pop()
-        self.__pop()
+        self.__stack_pop()
+        self.__stack_pop()
 
         non_terminal = self.grammar_rules[action][0]
 
-        self.__push(non_terminal)
+        self.__stack_push(non_terminal)
 
-        next_stack = self.__top()
+        next_stack_item = self.__stack_top()
 
-        result = self.grammar_rules[non_terminal][next_stack]
+        result = self.grammar_rules[non_terminal][next_stack_item]
 
-        self.__push(non_terminal)
-        self.__push(result)
+        self.__stack_push(non_terminal)
+        self.__stack_push(result)
 
         print(f"{non_terminal} <-----> {result}")
 
@@ -272,23 +272,23 @@ class Parser:
     def parse(self):
         #FIXME -> complete documentation
         """
-        
-        :return: 
+
+        :return:
         """
 
         action_result = 1
 
         while action_result != "ACCT: parsing_complete":
 
-            next_token = self.__get_next_token()
+            working_token = self.__get_next_token()
 
-            state = self.__top()
+            state = self.__stack_top()
 
-            lookup_result = self.__check_parse_table(state, next_token)
+            lookup_result = self.__check_parse_table(working_token, state)
 
-            action = self.parser_table[next_token]
+            action = self.parser_table[working_token]
 
-            action_result = self.__parse_action(action, next_token)
+            action_result = self.__parse_action(action, working_token)
 
             if action_result == 0:
                 raise "ERROR action_result = 0"
@@ -297,3 +297,5 @@ class Parser:
 if __name__ == "__main__":
 
     parser = Parser([], "parsing_table.csv", "grammar_table.csv")
+
+
