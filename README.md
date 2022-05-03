@@ -5,6 +5,8 @@ This is Jacob and Allen's project
 
 ## Team members and emails
 
+Jacob Ursenbach (jacob.ursenbach@gmail.com)
+
 Alan Turing (aturing@dcaron.xyz)
 
 ## How to compile and execute
