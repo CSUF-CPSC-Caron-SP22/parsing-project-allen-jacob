@@ -151,6 +151,7 @@ class Parser:
     # pseudo-stack functions
 
     def __top(self):
+        #FIXME -> complete documentation
         """
         pseudo top function for the self.stack
         list has all the rest of the functions needed for a stack
@@ -162,10 +163,20 @@ class Parser:
             return None
 
     def __pop(self):
-
+        #FIXME -> complete documentation
+        """
+        
+        :return: 
+        """
         return self.stack.pop(len(self.stack))
 
     def __push(self, push_item):
+        #FIXME -> complete documentation
+        """
+        
+        :param push_item: 
+        :return: 
+        """
         self.stack.append(push_item)
 
     # reduction steps
@@ -193,6 +204,7 @@ class Parser:
 
         print(f"{non_terminal} <-----> {result}")
 
+    # shift steps
     def __shift(self, action, token):
         # FIXME complete documentation
         """
@@ -210,17 +222,18 @@ class Parser:
     def __check_accepting_state(self, token):
         #FIXME complete documentation
         """
-        
-        :param token: 
-        :return: 
+
+        :param token:
+        :return:
         """
-        
+
         if token == "ACCT":
             return True
         else:
             return False
 
     def __parse_action(self, action, token):
+        #FIXME -> complete documentation
         """
 
         :param token:
@@ -257,10 +270,15 @@ class Parser:
         return success
 
     def parse(self):
+        #FIXME -> complete documentation
+        """
+        
+        :return: 
+        """
 
         action_result = 1
 
-        while action_result != "ACCT":
+        while action_result != "ACCT: parsing_complete":
 
             next_token = self.__get_next_token()
 
@@ -279,5 +297,3 @@ class Parser:
 if __name__ == "__main__":
 
     parser = Parser([], "parsing_table.csv", "grammar_table.csv")
-
-
