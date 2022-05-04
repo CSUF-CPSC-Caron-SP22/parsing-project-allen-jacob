@@ -18,26 +18,32 @@ class Parser:
         Class constructor takes the token stream output from the 
         lexical analyzer as input. Appends $ to the end of the stream.
         """
-        # token_stream is the stack
+        # token_stream
+        # ex: [ (token, type) , (token, type) ]
         self.token_stream = token_stream
 
         # Append the end of file symbol to the end.
         self.token_stream.append(("$", "$"))
 
+        print(f"token stream: \n{self.token_stream}")
+
         # Create Stack
-        self.stack = []
+        self.stack = ['E']
 
         # push state 0 onto stack
         self.stack.append('0')
 
         # self.parser_table = self.__read_parse_table(parse_table_file)
         self.parser_table = self.__read_parse_table(parse_table_filename)
+        print(f"PARSE TABLE: {self.parser_table}")
 
         # Create Grammar Rules
         self.grammar_rules = {}
 
         # set grammar rules dict
         self.grammar_rules = self.__read_grammar_rules(grammar_rules_filename)
+        print(f"GRAMMAR RULES: {self.grammar_rules}")
+
 
     def __read_parse_table(self, parse_table_file: str) -> dict[str:list]:
         """
@@ -96,15 +102,11 @@ class Parser:
             for item in row_list:
                 parser_dict.update({item: []})
 
-            # test code
-            print(parser_dict)
-
             # leaves after it grabs the csv header
             break
 
         # iterates through csv file and creates a dict that uses header as the keys
         for row in csv_file:
-            print(row)
             i = 0
 
             while i < len(row):
@@ -116,11 +118,9 @@ class Parser:
         parser_dict[''].pop()
         parser_dict[''] = row_list
 
-        print(parser_dict)
-
         return parser_dict
 
-    def __check_parse_table(self, state: str, token: str) -> str:
+    def __check_parse_table(self, token: str, state: str) -> str:
         """
 
         :param state:
@@ -129,7 +129,17 @@ class Parser:
         """
         # looks up result on parser table
         # FIXME brittle code
-        return self.parser_table[token][self.parser_table[''].index(state)]
+        # ToDo delete test code
+
+        # reminder token = ( token, type )
+
+        if type(token) is tuple:
+            # because token is: ( token, type ) token[1] allows parser to search token type in parse table
+            return self.parser_table[token[1]][int(state)]
+        else:
+            return self.parser_table[token][int(state)]
+
+
 
     def __has_next_token(self):
         """
@@ -168,7 +178,7 @@ class Parser:
 
         :return:
         """
-        return self.stack.pop(len(self.stack))
+        return self.stack.pop(len(self.stack)-1)
 
     def __stack_push(self, push_item):
         #FIXME -> complete documentation
@@ -188,21 +198,35 @@ class Parser:
         :param token:
         :return:
         """
-        self.__stack_pop()
-        self.__stack_pop()
+        print(f"REDUCE: {action}--->")
+
+        pops = int(self.grammar_rules[action][2])
+        print(f"pops {pops}")
+
+        #self.__stack_pop()
+        #self.__stack_pop()
+
+        while pops != 0:
+            self.__stack_pop()
+            pops -= 1
+
+        print(f"after pops")
 
         non_terminal = self.grammar_rules[action][0]
 
-        self.__stack_push(non_terminal)
-
         next_stack_item = self.__stack_top()
 
-        result = self.grammar_rules[non_terminal][next_stack_item]
-
         self.__stack_push(non_terminal)
-        self.__stack_push(result)
 
-        print(f"{non_terminal} <-----> {result}")
+        print(f"__check_parse( {non_terminal} , {next_stack_item} )")
+        result = self.__check_parse_table(non_terminal, next_stack_item)
+        # parser_table[non_terminal][int(next_stack_item)]
+        # self.__stack_push(non_terminal)
+
+        self.__stack_push(result)
+        print(f"REDUCTION COMPLETE- NEW STACK: {self.stack}")
+
+        print(f"REDUCTION: {non_terminal} <-----> {result} ---------")
 
     # shift steps
     def __shift(self, action, token):
@@ -214,10 +238,14 @@ class Parser:
         :param token:
         :return:
         """
+        print(f"SHIFT----->")
         # push token
         self.stack.append(token)
         # push parsing_table_row
-        self.stack.append(action[1])
+        new_action = action[1:]
+        self.stack.append(new_action)
+
+        print(f"END SHIFT------- new stack: {self.stack}")
 
     def __check_accepting_state(self, token):
         #FIXME complete documentation
@@ -226,7 +254,7 @@ class Parser:
         :param token:
         :return:
         """
-
+        print(f"ACCEPTING? {token}")
         if token == "ACCT":
             return True
         else:
@@ -239,28 +267,30 @@ class Parser:
         :param token:
         :return:
         """
+        print(f"__parse_action ACTION: {action} TOKEN {token}")
         # may not be needed
         success = 0
 
-        if token == '' or token is None:
+        if action == '' or token is None:
             success = 0
             raise "empty token"
 
-        if token == "ACCT":
+        if action == "ACCT":
             return "ACCT: parsing_complete"
 
             # shift
-        elif token[0] == 'S':
+        elif action[0] == 'S':
             success = 1
             self.__shift(action, token)
 
             # reduce
-        elif token[0] == 'R':
+        elif action[0] == 'R':
             success = 1
+            self.token_stream.insert(0, token)
             self.__reduce_token(action, token)
 
-        elif isinstance(token, int):
-            success = self.__check_accepting_state(token)
+        elif isinstance(action, int):
+            success = self.__check_accepting_state(action)
             if not success:
                 raise "not accepted state. check code"
         else:
@@ -277,21 +307,41 @@ class Parser:
         """
 
         action_result = 1
+        step = 1
 
         while action_result != "ACCT: parsing_complete":
 
-            working_token = self.__get_next_token()
+            print_stack = ''
+            print_stream = ''
 
+            for item in self.token_stream:
+                print_stream += item[0]
+
+            for item in self.stack:
+                if type(item) == tuple:
+                    print_stack += item[0]
+                else:
+                    print_stack += item
+
+            print(f"  STEP: {step}---------------------\n"
+                  f" STACK: {print_stack}\n"
+                  f"STREAM: {print_stream}\n")
+
+            working_token = self.__get_next_token()
             state = self.__stack_top()
 
-            lookup_result = self.__check_parse_table(working_token, state)
-
-            action = self.parser_table[working_token]
+            action = self.__check_parse_table(working_token, state)
+            print(f"TABLE LOOKUP: [{working_token[0]}, {state}] = {action} ")
 
             action_result = self.__parse_action(action, working_token)
 
             if action_result == 0:
                 raise "ERROR action_result = 0"
+            if action_result == "ACCT: parsing_complete":
+                print(f"{action_result} -> SUCCESS \n"
+                      f"STACK: {self.stack}")
+
+            step += 1
 
 
 if __name__ == "__main__":
