@@ -42,7 +42,6 @@ class Parser:
 
         # set grammar rules dict
         self.grammar_rules = self.__read_grammar_rules(grammar_rules_filename)
-        print(f"GRAMMAR RULES: {self.grammar_rules}")
 
 
     def __read_parse_table(self, parse_table_file: str) -> dict[str:list]:
@@ -198,10 +197,8 @@ class Parser:
         :param token:
         :return:
         """
-        print(f"REDUCE: {action}--->")
-
         pops = int(self.grammar_rules[action][2])
-        print(f"pops {pops}")
+
 
         #self.__stack_pop()
         #self.__stack_pop()
@@ -210,23 +207,19 @@ class Parser:
             self.__stack_pop()
             pops -= 1
 
-        print(f"after pops")
-
         non_terminal = self.grammar_rules[action][0]
 
         next_stack_item = self.__stack_top()
 
         self.__stack_push(non_terminal)
 
-        print(f"__check_parse( {non_terminal} , {next_stack_item} )")
+
         result = self.__check_parse_table(non_terminal, next_stack_item)
         # parser_table[non_terminal][int(next_stack_item)]
         # self.__stack_push(non_terminal)
 
         self.__stack_push(result)
-        print(f"REDUCTION COMPLETE- NEW STACK: {self.stack}")
 
-        print(f"REDUCTION: {non_terminal} <-----> {result} ---------")
 
     # shift steps
     def __shift(self, action, token):
@@ -238,14 +231,12 @@ class Parser:
         :param token:
         :return:
         """
-        print(f"SHIFT----->")
         # push token
         self.stack.append(token)
         # push parsing_table_row
         new_action = action[1:]
         self.stack.append(new_action)
 
-        print(f"END SHIFT------- new stack: {self.stack}")
 
     def __check_accepting_state(self, token):
         #FIXME complete documentation
@@ -254,7 +245,6 @@ class Parser:
         :param token:
         :return:
         """
-        print(f"ACCEPTING? {token}")
         if token == "ACCT":
             return True
         else:
@@ -267,7 +257,6 @@ class Parser:
         :param token:
         :return:
         """
-        print(f"__parse_action ACTION: {action} TOKEN {token}")
         # may not be needed
         success = 0
 
@@ -305,10 +294,27 @@ class Parser:
 
         :return:
         """
+        success = ("  ___  _____  _____ _____            _____ _   _ _____  _____  _____ _____ _____\n"
+                   " / _ \\/  __ \\/  __ \\_   _|          /  ___| | | /  __ \\/  __ \\|  ___/  ___/  ___|\n"
+                   "/ /_\\ \\ /  \\/| /  \\/ | |    ______  \\ `--.| | | | /  \\/| /  \\/| |__ \\ `--.\\ `--. \n"
+                   "|  _  | |    | |     | |   |______|  `--. \\ | | | |    | |    |  __| `--. \\`--. \\\n"
+                   "| | | | \\__/\\| \\__/\\ | |            /\\__/ / |_| | \\__/\\| \\__/\\| |___/\\__/ /\\__/ /\n"
+                   "\\_| |_/\\____/ \\____/ \\_/            \\____/ \\___/ \\____/ \\____/\\____/\\____/\\____/ \n")
+        start = ("----------------------------------------------------------------------------------\n"
+                 "\t______ _____ _____ _____ _   _  ______  ___  ______  _____ _____\n"
+                 "\t| ___ \\  ___|  __ \\_   _| \\ | | | ___ \\/ _ \\ | ___ \\/  ___|  ___|\n"
+                 "\t| |_/ / |__ | |  \\/ | | |  \\| | | |_/ / /_\\ \\| |_/ /\\ `--.| |__ \n"
+                 "\t| ___ \\  __|| | __  | | | . ` | |  __/|  _  ||    /  `--. \\  __| \n"
+                 "\t| |_/ / |___| |_\\ \\_| |_| |\\  | | |   | | | || |\\ \\ /\\__/ / |___ \n"
+                 "\t\\____/\\____/ \\____/\\___/\\_| \\_/ \\_|   \\_| |_/\\_| \\_|\\____/\\____/\n"
+                 "----------------------------------------------------------------------------------")
+
+        print(start)
 
         action_result = 1
         step = 1
 
+        print(f"{'STEP' :<5} {'STACK' :<15} {'STREAM' :<11} {'Table Lookup' :<15}")
         while action_result != "ACCT: parsing_complete":
 
             print_stack = ''
@@ -323,15 +329,12 @@ class Parser:
                 else:
                     print_stack += item
 
-            print(f"  STEP: {step}---------------------\n"
-                  f" STACK: {print_stack}\n"
-                  f"STREAM: {print_stream}\n")
-
             working_token = self.__get_next_token()
             state = self.__stack_top()
 
             action = self.__check_parse_table(working_token, state)
-            print(f"TABLE LOOKUP: [{working_token[0]}, {state}] = {action} ")
+            print(f"{step :<5} {print_stack :<15} {print_stream :<11} "
+                  f"{'['+working_token[0]+','+state+']='+action:<15} ")
 
             action_result = self.__parse_action(action, working_token)
 
@@ -339,7 +342,7 @@ class Parser:
                 raise "ERROR action_result = 0"
             if action_result == "ACCT: parsing_complete":
                 print(f"{action_result} -> SUCCESS \n"
-                      f"STACK: {self.stack}")
+                      f"{success}")
 
             step += 1
 
@@ -347,5 +350,3 @@ class Parser:
 if __name__ == "__main__":
 
     parser = Parser([], "parsing_table.csv", "grammar_table.csv")
-
-
