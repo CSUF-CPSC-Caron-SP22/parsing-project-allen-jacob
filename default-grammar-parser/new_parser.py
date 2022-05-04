@@ -43,8 +43,7 @@ class Parser:
         # set grammar rules dict
         self.grammar_rules = self.__read_grammar_rules(grammar_rules_filename)
 
-
-    def __read_parse_table(self, parse_table_file: str) -> dict[str:list]:
+    def __read_parse_table(self, parse_table_file: str):
         """
         Reads the parse table from a file.
         @param parse_table_file The file path for the parse table csv file.
@@ -63,7 +62,7 @@ class Parser:
 
         return parser_dict
 
-    def __read_grammar_rules(self, grammar_rules_file: str) -> dict[str:list]:
+    def __read_grammar_rules(self, grammar_rules_file: str):
         """
         Reads the grammar dict from a file
         :param grammar_rules_file: grammar dict filename
@@ -82,7 +81,7 @@ class Parser:
 
         return grammar_dict
 
-    def __parse_to_dict(self, csv_file: csv) -> dict[str:list]:
+    def __parse_to_dict(self, csv_file: csv):
         """
         helper function for __read_parse_table
         parses a csv.reader object into a parse_dict
@@ -119,7 +118,7 @@ class Parser:
 
         return parser_dict
 
-    def __check_parse_table(self, token: str, state: str) -> str:
+    def __check_parse_table(self, token: str, state: str):
         """
 
         :param state:
@@ -189,7 +188,7 @@ class Parser:
         self.stack.append(push_item)
 
     # reduction steps
-    def __reduce_token(self, action: str, token: str) -> None:
+    def __reduce_token(self, action: str, token: str):
         #FIXME -> complete documentation
         """
 
@@ -236,7 +235,6 @@ class Parser:
         # push parsing_table_row
         new_action = action[1:]
         self.stack.append(new_action)
-
 
     def __check_accepting_state(self, token):
         #FIXME complete documentation
@@ -350,3 +348,5 @@ class Parser:
 if __name__ == "__main__":
 
     parser = Parser([], "parsing_table.csv", "grammar_table.csv")
+
+
