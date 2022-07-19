@@ -1,0 +1,4 @@
+,R0,R1,R2,R4,R3
+token,S`,S,S,E,E
+result,S,id,e=e,id,e+id
+pops,2,6,6,2,6
